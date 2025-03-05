@@ -20,7 +20,7 @@ export const InMemoryClient = (): Client & Disposable => ({
   dispose: () => Promise.resolve(),
   invoke,
   command: (_, name, data, target,metadata, skipValidation) =>
-    command({ name, data, ...target }, metadata, skipValidation),
+    command({ name, data, ...target }, skipValidation, metadata),
   event,
   load,
   query,

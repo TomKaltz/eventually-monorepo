@@ -73,8 +73,8 @@ export function command<C extends Messages>(
             expectedVersion,
             actor: ctx.actor
           },
-          undefined,
-          true
+          true,
+          undefined
         );
       } catch (error) {
         throw trpcError(error);

@@ -73,8 +73,8 @@ export type Client = {
     name: N,
     data: Readonly<C[N]>,
     target: CommandTarget,
+    skipValidation?: boolean,
     metadata?: CommittedEventMetadata,
-    skipValidation?: boolean
   ) => Promise<Snapshot<S, E> | undefined>;
 
   /**
