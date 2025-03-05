@@ -9,6 +9,7 @@ import type {
   AllQuery,
   CommandTarget,
   CommittedEvent,
+  CommittedEventMetadata,
   Message,
   Messages,
   Snapshot,
@@ -72,6 +73,7 @@ export type Client = {
     name: N,
     data: Readonly<C[N]>,
     target: CommandTarget,
+    metadata?: CommittedEventMetadata,
     skipValidation?: boolean
   ) => Promise<Snapshot<S, E> | undefined>;
 

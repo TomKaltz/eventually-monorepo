@@ -19,8 +19,8 @@ export const InMemoryClient = (): Client & Disposable => ({
   name: "InMemoryClient",
   dispose: () => Promise.resolve(),
   invoke,
-  command: (_, name, data, target, skipValidation) =>
-    command({ name, data, ...target }, undefined, skipValidation),
+  command: (_, name, data, target,metadata, skipValidation) =>
+    command({ name, data, ...target }, metadata, skipValidation),
   event,
   load,
   query,
