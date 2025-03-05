@@ -5,7 +5,8 @@ import type {
   Messages,
   Patch,
   State,
-  Snapshot
+  Snapshot,
+  CommandTarget
 } from "./messages";
 import type { ProjectionMap, ProjectionPatch } from "./projection";
 import type { CommandHandlerFactory } from "./factories";
@@ -19,6 +20,7 @@ export type EventHandlerContext = {
     factory: CommandHandlerFactory<S2, C2, E2>,
     name: N,
     data: C2[N],
+    target: CommandTarget,
     skipValidation?: boolean
   ) => Promise<Snapshot<S2, E2> | undefined>,
   read: Client['read'],

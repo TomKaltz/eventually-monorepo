@@ -9,6 +9,7 @@ import type {
   Messages,
   State,
   CommandHandlerFactory,
+  CommandTarget,
 } from "../types";
 import type { EventHandlerContext } from "../types/handlers";
 import { bind, validateMessage } from "../utils";
@@ -54,12 +55,15 @@ export default async function event<
           factory: CommandHandlerFactory<S2, C2, E2>,
           name: N,
           data: C2[N],
+          target: CommandTarget,
           skipValidation = false
         ) => {
           return command<S2, C2, E2>(
             {
               name: name as string,
               data: data as Readonly<C2[string]>,
+              stream: target.stream,
+              expectedVersion: target.expectedVersion,
               actor: {
                 id: actor || factory.name,
                 name: factory.name,
