@@ -28,11 +28,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "pnpm"
+
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
 
       - name: Install dependencies
         run: pnpm install
@@ -40,4 +42,5 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpm dlx pkg-pr-new publish
+      - name: Publish
+        run: pnpm dlx pkg-pr-new publish
