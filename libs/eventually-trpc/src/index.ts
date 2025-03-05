@@ -73,6 +73,7 @@ export function command<C extends Messages>(
             expectedVersion,
             actor: ctx.actor
           },
+          undefined,
           true
         );
       } catch (error) {
