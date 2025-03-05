@@ -1,14 +1,15 @@
-import { z, type ZodRawShape, type ZodType, type ZodTypeAny } from "zod";
+import { z, ZodRawShape, ZodType, ZodTypeAny } from "zod";
+import type { Projection } from "./projection";
 import type {
   ActorHandler,
   CommandHandler,
+  EventHandlerContext,
   EventReducer,
   Invariant,
   ProjectorReducer,
   StateReducer
 } from "./handlers";
 import type { CommittedEvent, Message, Messages, State } from "./messages";
-import type { Projection } from "./projection";
 
 /** All artifact types */
 export type ArtifactType =
@@ -144,7 +145,8 @@ export type Policy<
   schemas: PolicySchemas<C, E>;
   on: {
     [K in keyof E]: (
-      event: CommittedEvent<Pick<E, K>>
+      event: CommittedEvent<Pick<E, K>>,
+      ctx: EventHandlerContext
     ) => Promise<Message<C> | undefined> | undefined;
   };
 };
@@ -167,7 +169,8 @@ export type ProcessManager<
   on: {
     [K in keyof E]: (
       event: CommittedEvent<Pick<E, K>>,
-      state: Readonly<S>
+      state: Readonly<S>,
+      ctx: EventHandlerContext
     ) => Promise<Message<C> | undefined> | undefined;
   };
 };

@@ -4,9 +4,26 @@ import type {
   Message,
   Messages,
   Patch,
-  State
+  State,
+  Snapshot
 } from "./messages";
 import type { ProjectionMap, ProjectionPatch } from "./projection";
+import type { CommandHandlerFactory } from "./factories";
+import { Client } from "./client";
+
+/**
+ * Context provided to Policy and ProcessManager event handlers with utilities for dispatching commands
+ */
+export type EventHandlerContext = {
+  command: <S2 extends State, C2 extends Messages, E2 extends Messages, N extends keyof C2>(
+    factory: CommandHandlerFactory<S2, C2, E2>,
+    name: N,
+    data: C2[N],
+    skipValidation?: boolean
+  ) => Promise<Snapshot<S2, E2> | undefined>,
+  read: Client['read'],
+  load: Client['load']
+};
 
 /**
  * State reducers apply partial state patches to a state, and returns the new state
@@ -45,7 +62,8 @@ export type ProjectorReducer<
   K extends keyof E
 > = (
   event: CommittedEvent<Pick<E, K>>,
-  map: ProjectionMap<S>
+  map: ProjectionMap<S>,
+  ctx: Pick<EventHandlerContext, 'read' | 'load'>
 ) => Promise<ProjectionPatch<S>[]>;
 
 /**

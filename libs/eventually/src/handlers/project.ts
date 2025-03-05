@@ -1,5 +1,5 @@
 import type { ProjectorStore } from "../interfaces";
-import { _imps, app, log } from "../ports";
+import { _imps, app, client, log } from "../ports";
 import type {
   CommittedEvent,
   Messages,
@@ -43,7 +43,7 @@ export default async function project<S extends State, E extends Messages>(
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
     log().green().trace(`\n>>> ${factory.name}`, event);
-    const patches = await projector.on[event.name](event, map);
+    const patches = await projector.on[event.name](event, map, {load: client().load, read: client().read});
     patches.forEach((p) => {
       const id = "id" in p && p.id;
       const where = "where" in p && p.where;

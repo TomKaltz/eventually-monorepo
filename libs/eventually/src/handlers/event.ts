@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { log } from "../ports";
+import { client, log } from "../ports";
 import type {
   CommittedEvent,
   CommittedEventMetadata,
@@ -7,8 +7,10 @@ import type {
   EventResponse,
   Message,
   Messages,
-  State
+  State,
+  CommandHandlerFactory,
 } from "../types";
+import type { EventHandlerContext } from "../types/handlers";
 import { bind, validateMessage } from "../utils";
 import command from "./command";
 import message from "./message";
@@ -46,7 +48,41 @@ export default async function event<
     artifact,
     { actor },
     async (snapshot) => {
-      cmd = await artifact.on[name](event, snapshot.state);
+      // Create a context with a bound command function for event handlers
+      const ctx: EventHandlerContext = {
+        command: async <S2 extends State, C2 extends Messages, E2 extends Messages, N extends keyof C2>(
+          factory: CommandHandlerFactory<S2, C2, E2>,
+          name: N,
+          data: C2[N],
+          skipValidation = false
+        ) => {
+          return command<S2, C2, E2>(
+            {
+              name: name as string,
+              data: data as Readonly<C2[string]>,
+              actor: {
+                id: actor || factory.name,
+                name: factory.name,
+                expectedCount: actor ? snapshot.applyCount : undefined
+              }
+            },
+            metadata,
+            skipValidation
+          );
+        },
+        read: client().read,
+        load: client().load
+      };
+      
+      // Check if this is a policy (no state schema) or a process manager (has state schema)
+      if (!("state" in artifact.schemas)) {
+        // It's a policy, pass the context
+        cmd = await (artifact as any).on[name](event, ctx);
+      } else {
+        // It's a process manager, pass the state and context
+        cmd = await (artifact as any).on[name](event, snapshot.state, ctx);
+      }
+      
       if (cmd) {
         // command side effects are handled synchronously, thus event handlers can fail
         await command<S, C, E>(
