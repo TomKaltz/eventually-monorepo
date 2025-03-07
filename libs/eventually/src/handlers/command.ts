@@ -10,6 +10,7 @@ import {
   type Snapshot,
   type State
 } from "../types";
+import { bind, emit } from "../utils";
 import { validateMessage } from "../utils/validation";
 import message from "./message";
 
@@ -61,7 +62,10 @@ export default async function command<
             );
         });
       }
-      return artifact.on[name](validated.data, state, actor);
+      return artifact.on[name](validated.data, state, actor, {
+        bind,
+        emit
+      });
     },
     {
       correlation: metadata?.correlation || randomUUID(),

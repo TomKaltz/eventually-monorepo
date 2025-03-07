@@ -1,30 +1,35 @@
+import { Client } from "./client";
+import type { CommandHandlerFactory } from "./factories";
 import type {
   Actor,
+  CommandTarget,
   CommittedEvent,
   Message,
   Messages,
   Patch,
-  State,
   Snapshot,
-  CommandTarget
+  State
 } from "./messages";
 import type { ProjectionMap, ProjectionPatch } from "./projection";
-import type { CommandHandlerFactory } from "./factories";
-import { Client } from "./client";
 
 /**
  * Context provided to Policy and ProcessManager event handlers with utilities for dispatching commands
  */
 export type EventHandlerContext = {
-  command: <S2 extends State, C2 extends Messages, E2 extends Messages, N extends keyof C2>(
+  command: <
+    S2 extends State,
+    C2 extends Messages,
+    E2 extends Messages,
+    N extends keyof C2
+  >(
     factory: CommandHandlerFactory<S2, C2, E2>,
     name: N,
     data: C2[N],
     target: CommandTarget,
     skipValidation?: boolean
-  ) => Promise<Snapshot<S2, E2> | undefined>,
-  read: Client['read'],
-  load: Client['load']
+  ) => Promise<Snapshot<S2, E2> | undefined>;
+  read: Client["read"];
+  load: Client["load"];
 };
 
 /**
@@ -65,8 +70,16 @@ export type ProjectorReducer<
 > = (
   event: CommittedEvent<Pick<E, K>>,
   map: ProjectionMap<S>,
-  ctx: Pick<EventHandlerContext, 'read' | 'load'>
+  ctx: Pick<EventHandlerContext, "read" | "load">
 ) => Promise<ProjectionPatch<S>[]>;
+
+/**
+ * Bind function type for creating messages
+ */
+export type BindFunction = <M extends Messages, N extends keyof M & string>(
+  name: N,
+  data: Readonly<M[N]>
+) => Message<M, N>;
 
 /**
  * Command handlers handle commands and emit events
@@ -82,7 +95,14 @@ export type CommandHandler<
 > = (
   data: Readonly<C[K]>,
   state: Readonly<S>,
-  actor?: Actor
+  actor: Actor | undefined,
+  ctx: {
+    bind: BindFunction,
+    emit: <N extends keyof E & string>(
+      name: N,
+      data: Readonly<E[N]>
+    ) => Promise<Message<E, N>[]>
+  }
 ) => Promise<Message<E>[]>;
 
 /**
